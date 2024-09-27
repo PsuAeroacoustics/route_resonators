@@ -8,6 +8,7 @@ from heapq import heappush,heappop
 from itertools import count
 import h5py
 import os
+from random import choice,randint
 #%%
 
 stensile = np.array([(1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1)])
@@ -67,26 +68,61 @@ class node(resonator):
 
 def build_blade_geom(saved_params):
     
-    
+    saved_params['airfoil'] = 'naca0014'
     af = asb.Airfoil(saved_params['airfoil'])
     af.coordinates = af.repanel(n_points_per_side = int(saved_params['airfoil_points']/2)).coordinates*saved_params['c']
-    af.coordinates[:,0] = -af.coordinates[:,0]
-    af.coordinates[:,0] = af.coordinates[:,0]+0.25*saved_params['c']
+    LE_ind,TE_ind = af.coordinates[:,0].argmin(),af.coordinates[:,0].argmax()
 
     pnts_per_sections = len(af.coordinates)
     n_sections = saved_params['N_elements']+1
 
     blade_nodes = np.zeros((n_sections,pnts_per_sections,3))
-    blade_nodes[:,:,1] = af.coordinates[:,0]
-    blade_nodes[:,:,0] = np.expand_dims(saved_params['r_elem']*saved_params['R'],axis = -1)*np.ones(pnts_per_sections)
+    blade_nodes[:,:,0] = af.coordinates[:,0]
+    blade_nodes[:,:,1] = np.expand_dims(saved_params['r_elem']*saved_params['R'],axis = -1)*np.ones(pnts_per_sections)
     blade_nodes[:,:,-1] = af.coordinates[:,-1]
 
+    af = asb.Airfoil(saved_params['airfoil'])
+    af.coordinates = af.repanel(n_points_per_side = int(saved_params['airfoil_points']/2)).coordinates*(saved_params['c']-2*saved_params['a'][0])
+
+    interior_blade_nodes = np.zeros((n_sections,pnts_per_sections,3))
+    interior_blade_nodes[:,:,0] = af.coordinates[:,0]
+    interior_blade_nodes[:,:,1] = np.expand_dims(saved_params['r_elem']*saved_params['R'],axis = -1)*np.ones(pnts_per_sections)
+    interior_blade_nodes[:,:,-1] = af.coordinates[:,-1]
+
+
+    th_tw = -6*np.pi/180
+    th = th_tw*saved_params['r_elem']
+
+    # def get_dcm(th):
+    #     dcm = np.array([[np.ones(len(th)),np.zeros(len(th)),np.zeros(len(th))],
+    #             [np.zeros(len(th)),np.cos(th),np.sin(th)],
+    #             [np.zeros(len(th)),np.sin(th),np.cos(th)]]).squeeze()
+    #     return dcm
+    
+    # dcm_th_tw = get_dcm(th)
+    # dcm_th0 = get_dcm([th_tw])
+
+    # blade_nodes = blade_nodes@dcm_th_tw.T
+
+    fig,ax = plt.subplots(1,1,figsize = (6.4,4.5))
+    ax.plot(blade_nodes[0,:,0],blade_nodes[0,:,-1])
+    ax.plot(interior_blade_nodes[0,:,0],interior_blade_nodes[0,:,-1])
+
+    # ax.plot(blade_nodes[0,:,1],blade_nodes[0,:,2])
+    # ax.plot(blade_nodes_tw[0,:,1],blade_nodes_tw[0,:,2])
+    # ax.set_xlabel('y')
+    # ax.set_ylabel('z')
+    ax.set_xlim([0,0.015])
+    ax.set_ylim([-0.005,0.005])
+    plt.grid()
+    plt.savefig('af_xsect.png',format = 'png')
+    plt.close()
     saved_params.update({'blade_nodes':blade_nodes})
 
 
 def generate_domain(saved_params):
 
-    num_Xsect = 32
+    num_Xsect = 1
     r_select = .5
 
     Xsect_ind = np.abs(r_select-saved_params['r']).argmin()
@@ -94,18 +130,18 @@ def generate_domain(saved_params):
 
     blade_nodes = saved_params['blade_nodes'][Xsect_ind,:,:]
     pnts_per_Xsect = blade_nodes.shape[1]
-
-    dx = np.array([np.min(saved_params['a'])/2,np.min(saved_params['a'])/2,np.min(saved_params['a'])/8])
-    x_min,y_min,z_min = np.min(blade_nodes.reshape(np.product(blade_nodes.shape[:2]),3),axis = 0)
-    x_max,y_max,z_max = np.max(blade_nodes.reshape(np.product(blade_nodes.shape[:2]),3),axis = 0)
+    
+    dx = 1.05*np.min(saved_params['a'])*np.ones(3)
+    x_min,y_min,z_min = np.min(blade_nodes.reshape(np.prod(blade_nodes.shape[:2]),3),axis = 0)
+    x_max,y_max,z_max = np.max(blade_nodes.reshape(np.prod(blade_nodes.shape[:2]),3),axis = 0)
     bounds = np.array([x_min,x_max,y_min,y_max,z_min,z_max])
 
     bound_range = bounds[1::2]- bounds[::2]
     x,y,z = [np.arange(bound_range[i]/dx[i])*dx[i]+bounds[::2][i] for i in range(3)]
     grid_coord = np.array(np.meshgrid(x,y,z))
 
-    z_min = interp.griddata(points = blade_nodes[:,int(pnts_per_Xsect/2):,:-1].reshape(np.product(blade_nodes[:,int(pnts_per_Xsect/2):].shape[:-1]),2),values =blade_nodes[:,int(pnts_per_Xsect/2):,-1].flatten(),xi =(grid_coord[0],grid_coord[1]), fill_value=0,method = 'linear')
-    z_max = interp.griddata(points = blade_nodes[:,:int(pnts_per_Xsect/2)+1,:-1].reshape(np.product(blade_nodes[:,:int(pnts_per_Xsect/2)+1].shape[:-1]),2),values =blade_nodes[:,:int(pnts_per_Xsect/2)+1,-1].flatten(),xi =(grid_coord[0],grid_coord[1]),fill_value=0,method = 'linear')
+    z_min = interp.griddata(points = blade_nodes[:,int(pnts_per_Xsect/2):,:-1].reshape(np.prod(blade_nodes[:,int(pnts_per_Xsect/2):].shape[:-1]),2),values =blade_nodes[:,int(pnts_per_Xsect/2):,-1].flatten(),xi =(grid_coord[0],grid_coord[1]), fill_value=0,method = 'linear')
+    z_max = interp.griddata(points = blade_nodes[:,:int(pnts_per_Xsect/2)+1,:-1].reshape(np.prod(blade_nodes[:,:int(pnts_per_Xsect/2)+1].shape[:-1]),2),values =blade_nodes[:,:int(pnts_per_Xsect/2)+1,-1].flatten(),xi =(grid_coord[0],grid_coord[1]),fill_value=0,method = 'linear')
 
     # configures boolean grid that is True if a grid point is free and False if occupied
     grid = np.ones(grid_coord.shape[1:]).astype(bool)
@@ -118,6 +154,14 @@ def generate_domain(saved_params):
     grid[grid_coord[-1]>=z_max] = False
 
     saved_params.update({'x':x,'y':y,'z':z,'z_max':z_max,'z_min':z_min,'r_select':r_select,'num_Xsect':num_Xsect,'Xsect_ind':Xsect_ind,'dx':dx,'bounds':bounds,'grid_coord':grid_coord,'grid':grid})
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.scatter(blade_nodes[:,:,0].flatten(),blade_nodes[:,:,1].flatten(),blade_nodes[:,:,-1].flatten())
+    ax.scatter(grid_coord[0].flatten(),grid_coord[1].flatten(),z_max.flatten())
+    # ax.scatter(grid_coord[0][grid].flatten(),grid_coord[1][grid].flatten(),grid_coord[2][grid].flatten())
+    plt.savefig('blade.png',format = 'png')
+    plt.close()
 
 def arange_resonators(saved_params):
     
@@ -141,6 +185,72 @@ def arange_resonators(saved_params):
     res_type = np.round(np.random.rand(len(z_res))*(N_res-1)).astype(int)
 
     saved_params.update({'N_total':N_total,'res_type':res_type,'x_res':x_res,'y_res':y_res,'z_res':z_res})
+
+def poisson_disc(saved_params):
+        # number of unique resonators for each blade element
+    N_res = len(saved_params['a'])
+    # total number of resonators to route
+    N_total = int(np.sum(N_res*saved_params['N'][saved_params['Xsect_ind']][:-1]))
+    r = np.sqrt(2)*np.mean(saved_params['dx'])
+
+    # minimum and maximum chord and spanwise extents of the resonator patch expressed as a percentage of the planform of the blade section (x_min,x_max,y_min,y_max)
+    c_extents = np.array([.1,.35])*saved_params['c']
+    c_extents_ind = np.round(c_extents/saved_params['dx'][0]).astype(int)
+
+    # grid_coord_trim  = saved_params['grid_coord'][:2,:,slice(c_extents_ind[0],c_extents_ind[1]),0]
+    # z_max_trim = np.expand_dims(saved_params['z_max'][:,slice(c_extents_ind[0],c_extents_ind[1]),0],axis = 0)
+    res_grid_coord = np.concatenate((saved_params['grid_coord'][:2,:,slice(c_extents_ind[0],c_extents_ind[1]),0],np.expand_dims(saved_params['z_max'][:,slice(c_extents_ind[0],c_extents_ind[1]),0],axis = 0)),axis = 0).transpose(1,2,0)
+    res_grid = np.ones(res_grid_coord.shape[:-1],dtype=bool)
+
+    active_pnts = []
+
+    x0_ind = tuple((np.array(res_grid.shape)/2).astype(int))
+    active_pnts.append(res_grid_coord[x0_ind])
+    res_grid[x0_ind]= False
+
+    while len(active_pnts) < N_total:
+    
+    # selected_pnts = res_grid_coord[slice(x0_ind[0]-2,x0_ind[0]+3),slice(x0_ind[1]-2,x0_ind[1]+3)]
+        
+        # removes point from the end of the active list
+        active_pnt = active_pnts[-1]
+        # computes distance from the active point to the surrounding points
+        active_pnt_dist = np.linalg.norm(res_grid_coord-active_pnt,axis = -1)
+
+        test_pnt_ind = (active_pnt_dist<=2*r) & (active_pnt_dist >= r)
+        test_pnts = res_grid_coord[test_pnt_ind][res_grid[test_pnt_ind]]
+        #  array of candidate points to add to the active list
+        # test_pnts = res_grid_coord[(active_pnt_dist<=2*r) & (active_pnt_dist >= r)]
+        
+        stop_flag = True
+        while stop_flag:
+            if test_pnts.size ==0:
+                break
+            else:
+                # generates a random index to select from the test list
+                test_pnt_ind = randint(0,len(test_pnts)-1)
+                # computes distance between the test point and surrounding points
+                test_pnt_dist = np.linalg.norm(res_grid_coord-test_pnts[test_pnt_ind],axis = -1)
+
+                if np.all(res_grid[test_pnt_dist<=r]):
+                    active_pnts.append(test_pnts[test_pnt_ind])
+                    res_grid[test_pnt_dist==0] = False
+                    stop_flag = False  
+                test_pnts = np.delete(test_pnts,test_pnt_ind,axis = 0)
+                    
+
+    active_pnts = np.array(active_pnts)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    # ax.scatter(res_grid_coord[0,x0_ind[0],x0_ind[1]],res_grid_coord[1,x0_ind[0],x0_ind[1]],res_grid_coord[2,x0_ind[0],x0_ind[1]],c = 'r')
+    ax.scatter(saved_params['grid_coord'][0].flatten(),saved_params['grid_coord'][1].flatten(),saved_params['z_max'].flatten(),alpha=.25)
+    ax.scatter(active_pnts[:,0],active_pnts[:,1],active_pnts[:,2],c = 'r')
+    ax.set_xlim(0,0.015)
+    ax.set_zlim(0,0.015)
+    plt.savefig('res_nodes.png',format = 'png')
+    plt.close()
+
 
 def route_resonators(saved_params):
    

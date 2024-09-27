@@ -13,6 +13,7 @@ def main():
 		build_blade_geom(saved_params)
 
 	generate_domain(saved_params)
+	poisson_disc(saved_params)
 	arange_resonators(saved_params)
 	res_paths = route_resonators(saved_params)
 	print('All packed!')

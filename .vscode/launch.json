@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/../rotor_gust_interaction/cases/scaled_mdof_geom_opt/mdof_geom_opt_parallel/"
+            "cwd": "${workspaceFolder}/../rotor_gust_interaction/cases/baseline/mdof_geom_opt/"
         }
     ]
 }
