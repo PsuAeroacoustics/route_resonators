@@ -12,9 +12,8 @@ def main():
 	if not 'blade_nodes' in saved_params:
 		build_blade_geom(saved_params)
 
-	generate_domain(saved_params)
-	poisson_disc(saved_params)
-	arange_resonators(saved_params)
+	initialize_grid(saved_params)
+	poisson_disc(saved_params,uniform=True)
 	res_paths = route_resonators(saved_params)
 	print('All packed!')
 
