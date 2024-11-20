@@ -13,8 +13,9 @@ def main():
 		build_blade_geom(saved_params)
 
 	initialize_grid(saved_params)
-	poisson_disc(saved_params,uniform=True)
+	arange_resonators(saved_params,uniform=True)
 	res_paths = route_resonators(saved_params)
+	wrtie_res_paths(res_paths)
 	print('All packed!')
 
 
