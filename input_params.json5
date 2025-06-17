@@ -1,0 +1,23 @@
+{
+"STL_file": "box.stl",
+// radius of cavities [m]
+"a": 0.001,
+// length of cavities [m]
+"L": [0.085],
+//radius of curvature of the bends
+"r_bend": 0.0005,
+// dimensions of the test sample [x_min,x_max,y_min,y_max,z_min,z_max]
+"dimensions": [0,0.050635,0,0.050635,0,0.03],
+// border around the perimiter of the top surface of the sample [m]
+"border": 0.0,
+// thickness of the walls of the geometry [m]
+"shell_thickness": 0.0005,
+// Open area ratio
+"OAR":0.15,
+// set to true to distribute the resonators uniformly on the surface of the sample 
+"uniform": true,
+// set to true to initially route the resonators  vertically so that there is enough clearence for them to bend. Useful for thin geometries
+"pre_route": true,
+// set to true to truncate the points that comprise the resonator path - all the nodes between bends will not be written. 
+"truncated": true
+}
