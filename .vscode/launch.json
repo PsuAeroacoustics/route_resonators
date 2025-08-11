@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "cwd": "/Users/danielweitsman/codes/github/DanWeitsman/unsteady_BEMT/cases/enlarged_blade/mdof_geom_opt_OAR_10"
+            "cwd": "/Users/danielweitsman/codes/github/DanWeitsman/unsteady_BEMT/cases/final_designs/mdof_geom_untwisted"
         }
     ]
 }
