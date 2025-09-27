@@ -331,7 +331,7 @@ def route(starting_node,total_length,saved_params):
             # iterates through each direction defined by the surrounding points
             for pnts in surrounding_nodes:
                 # will only append the points in a certain direction if the two points adjacent to the current point are unoccupied
-                if len(pnts)>0 and np.all(saved_params['grid'][get_index(pnts[:1],saved_params)]):
+                if len(pnts)>2 and np.all(saved_params['grid'][get_index(pnts[:1],saved_params)]):
                     # # will only append the points that
                     # if (get_index(pnts[0]) - active_node_ind) != -current_direction:
                     ind = get_index(pnts,saved_params)
