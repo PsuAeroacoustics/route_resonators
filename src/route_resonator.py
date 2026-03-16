@@ -7,8 +7,9 @@ from funcs import *
 def main():
     
 	case_dir = os.getcwd()
-	saved_params = read_results_from_h5(case_dir)
-	
+	if os.path.exists(os.path.join(case_dir,'saved_params.h5')):
+		saved_params = read_results_from_h5(case_dir)
+
 	if not 'blade_nodes' in saved_params:
 		build_blade_geom(saved_params)
 
