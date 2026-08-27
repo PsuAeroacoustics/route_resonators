@@ -125,6 +125,8 @@ When `truncated` is false, the file contains the retained grid points along the 
 
 ## Routing Algorithm
 
+[routing_flow_chart.pdf](https://github.com/user-attachments/files/31524306/routing_flow_chart.pdf)
+
 The first step of the algorithm is to embed the geometry within a Cartesian grid, where the grid spacing is determined by the resonator radius plus an additional tolerance to account for clearance between adjacent cavities. This introduces a key limitation of the method, namely that all cavities must have identical cross-sectional dimensions. The surface of the geometry is then interpolated on the grid using a multidimensional piecewise-cubic function. 
 
 Next, grid points lying outside the geometry are identified and marked as occupied. There are numerous methods that may be employed for this purpose. For instance, the signed distance function (SDF) representation of the geometry can be evaluated across the grid using methods, such as the Fast Marching Method (FMM) or Fast Sweeping Method (FSM). With this functional representation of the geometry, the grid points that lie within the geometry have negative SDF values, while those that fall outside of it have positive values. This approach is particularly useful for complex geometries that may have overlapping surfaces.  
