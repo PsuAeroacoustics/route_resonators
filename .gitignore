@@ -1,9 +1,10 @@
-.venv
-.vscode
+/.venv
+/.vscode
 .DS_Store
 /src
 __pycache__
 cone.stl
 duct.stl
 prop.stl
+box.stl
 saved_params.h5
