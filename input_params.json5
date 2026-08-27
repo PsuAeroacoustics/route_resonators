@@ -1,17 +1,18 @@
 {
 "STL_file": "box.stl",
 // radius of cavities [m]
-"a": 0.001,
+"a": 0.00085,
 // length of cavities [m]
-"L": [0.085],
+//0.03048, 0.05588, 0.08128, 0.10668
+"L": [0.06096],
 //radius of curvature of the bends
 "r_bend": 0.0005,
 // dimensions of the test sample [x_min,x_max,y_min,y_max,z_min,z_max]
-"dimensions": [0,0.050635,0,0.050635,0,0.03],
+"dimensions": [0,0.050635,0,0.050635,0,0.064008],
 // border around the perimiter of the top surface of the sample [m]
 "border": 0.0,
 // thickness of the walls of the geometry [m]
-"shell_thickness": 0.0005,
+"shell_thickness": 0.0012,
 // Open area ratio
 "OAR":0.15,
 // set to true to distribute the resonators uniformly on the surface of the sample 

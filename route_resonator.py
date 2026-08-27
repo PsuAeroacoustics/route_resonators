@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import argparse
 from funcs import *
 
@@ -20,7 +19,7 @@ def main():
 
 	arange_resonators(input_params,saved_params,uniform=True)
 	res_paths = route_resonators(input_params,saved_params)
-	wrtie_res_paths(res_paths)
+	write_res_paths(res_paths)
 	print('All packed!')
 
 if __name__ == "__main__":

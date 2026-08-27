@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 import numpy as np
-import scipy.interpolate as interp
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-# import aerosandbox as asb
 import h5py
 import os
 from random import randint
 from shutil import rmtree
-import trimesh
 import pyjson5
-from scipy.spatial import cKDTree
 import pyvista as pv
 
 #%%
@@ -78,7 +72,7 @@ def import_geom(input_params,saved_params):
 
 def initialize_domain(input_params,saved_params):
 
-    dx = 1.1*(2*input_params['a'])
+    dx = 1.25*2*input_params['a']
 
     x_min,y_min,z_min = saved_params['geom'].bounds[::2]
     x_max,y_max,z_max = saved_params['geom'].bounds[1::2]
@@ -134,7 +128,10 @@ def arange_resonators(input_params,saved_params, uniform = True):
         Nx,Ny = res_surface_trimmed[::skip_ind,::skip_ind].shape[:2]
 
         border_ind = border_ind+int(np.round((2*(Nx+Ny)-np.sqrt(4*(Nx+Ny)**2-16*(Nx*Ny-N)))/8))
-        res_nodes_temp = res_surface[border_ind:-border_ind,border_ind:-border_ind][::skip_ind,::skip_ind]
+        if border_ind ==0:
+            res_nodes_temp = res_surface[::skip_ind,::skip_ind]
+        else:
+            res_nodes_temp = res_surface[border_ind:-border_ind,border_ind:-border_ind][::skip_ind,::skip_ind]
         Nx,Ny = res_nodes_temp.shape[:2]
         N = int(Nx*Ny)
         OAR = N*np.pi*input_params['a']**2/(l*w)
@@ -212,11 +209,11 @@ def arange_resonators(input_params,saved_params, uniform = True):
     else:
         res_type = np.zeros(N,dtype = int)
     
-    if N_res>1:
-        route_order_ind = np.array(saved_params['res_types']).argsort(kind = 'stable')[::-1]
-    else:
+    # if N_res>1:
+    #     route_order_ind = res_type.argsort(kind = 'stable')[::-1]
+    # else:
         # route_order_ind  = np.arange(N)
-        route_order_ind = np.random.permutation(np.arange(N))
+    route_order_ind = np.random.permutation(np.arange(N))
         # route_order_ind  = np.arange(N).reshape(Nx,Ny,order = 'F').ravel()
 
     saved_params.update({'res_nodes':res_nodes,'res_types':res_type,'route_order_ind':route_order_ind})
@@ -366,7 +363,7 @@ def route_resonators(input_params,saved_params):
 
     return res_paths
 
-def wrtie_res_paths(res_paths):
+def write_res_paths(res_paths):
     
 
     save_dir = os.path.join(os.getcwd(),'res_paths')
