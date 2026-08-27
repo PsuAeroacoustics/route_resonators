@@ -125,7 +125,7 @@ When `truncated` is false, the file contains the retained grid points along the 
 
 ## Routing Algorithm
 
-[routing_flow_chart.pdf](https://github.com/user-attachments/files/31524306/routing_flow_chart.pdf)
+<img width="2600" height="2600" alt="routing_flow_chart" src="https://github.com/user-attachments/assets/81f5e2fd-fa83-4e3d-930a-33822da192a9" />
 
 The first step of the algorithm is to embed the geometry within a Cartesian grid, where the grid spacing is determined by the resonator radius plus an additional tolerance to account for clearance between adjacent cavities. This introduces a key limitation of the method, namely that all cavities must have identical cross-sectional dimensions. The surface of the geometry is then interpolated on the grid using a multidimensional piecewise-cubic function. 
 
