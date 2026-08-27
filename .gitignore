@@ -1,11 +1,9 @@
-/__pycache__
 /.venv
 /.vscode
-launch.json
+.DS_Store
+/src
+__pycache__
 cone.stl
 duct.stl
 prop.stl
-/src/compare_blade_geom.py
-.DS_Store
-input_params.json5
-src/__pycache__/funcs.cpython-312.pyc
+box.stl
