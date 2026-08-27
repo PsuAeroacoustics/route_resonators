@@ -1,6 +1,6 @@
 # Route Resonators
 
-Route Resonators generates paths for open-closed resonant cavities inside closed geometries. The main branch supports most arbitrary geometries, while the `nit_sample` branch is specifically intended for rectangular samples for the normal incidence impedance tube. The routing algorithm is the same regardless of the sample geometry, however, the setup specifically the distribution of the cavity openings on the surface of the geometries differs. 
+Route Resonators generates paths for open-closed resonant cavities inside closed geometries. The main branch is intended for routing the cavities through a rotor blade. It relies on the output file `saved_params.h5` from https://github.com/DanWeitsman/rotor_gust_interaction. This file contains information about the blade geometry as well as parameters regarding the resonator cavities. The `nit_sample` branch is specifically intended for rectangular samples for the normal incidence impedance tube and does not require this input file. The routing algorithm is the same regardless of the sample geometry, however, the setup specifically the distribution of the cavity openings on the surface of the geometries differs. 
 
 The routing algorithm first discretizes the geometry on a Cartesian grid, determines the distribution of the resonators across the surface, and then routes each cavity through the interior until the length requirement is met. It also tracks previously routed cavities to prevent overlap. 
 
